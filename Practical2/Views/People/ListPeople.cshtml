@@ -1,0 +1,197 @@
+﻿@* Interface Enumarable = Enumarate or list (to ascertain the number of : count) *@
+
+@model IEnumerable<Practical2.Models.PersonModel>
+
+@{
+    ViewBag.Title = "List of People";
+}
+
+<h2>List of People</h2>
+<a href="/People/create">Create New</a>
+
+<div>
+    <label>Search string</label>
+    <input type="text" id="search" />
+    <button id="submit">Submit</button>
+</div>
+
+<table class="table table-bordered">
+
+    <tr style="background-color: darkgreen; color: white; ">
+        <th width="20%">
+            @Html.DisplayNameFor(model => model.StuNumber)
+        </th>
+        <th width="20%">
+            @Html.DisplayNameFor(model => model.FirstName)
+        </th>
+        <th width="20%">
+            @Html.DisplayNameFor(model => model.LastName)
+        </th>
+        <th class="text-center" width="20%">
+            @Html.DisplayNameFor(model => model.Email)
+        </th>
+        <th class="text-center" width="20%">
+            Delete
+        </th>
+
+
+    </tr>
+
+    @foreach (var item in Model) //For each person
+    {
+        <tr>
+            <td width="20%">
+                @Html.DisplayFor(modelItem => item.StuNumber)
+            </td>
+            <td width="20%">
+                @Html.DisplayFor(modelItem => item.FirstName)
+            </td>
+            <td width="20%">
+                @Html.DisplayFor(modelItem => item.LastName)
+            </td>
+            <td class="text-center" width="20%">
+                @Html.DisplayFor(modelItem => item.Email)
+            </td>
+            <td class="text-center " width="20%">
+                <button class="delete btn btn-success">Delete</button>
+            </td>
+
+        </tr>
+    }
+</table>
+
+<button onclick="saveTable()">Save to local storage</button>
+<button onclick="retrieve()">Retrieve from local storage</button>
+<button id="clear-storage">Clear local storage</button>
+
+@section Scripts{
+
+    <script>
+        //STEP ONE add a click event on the search button
+        document.querySelector("#submit").addEventListener("click", () => {
+            //step 1 get the actual input
+            const searchValue = document.querySelector("#search").value;
+
+
+            //get the table rows
+            const rows = document.querySelector("table").rows;
+
+            //loop through the rows
+            for (let i = 1; i < rows.length; i++) {
+
+                //if the current cell inclues searchValue
+                if (rows[i].cells[1].textContent.trim().includes(searchValue)) {
+                    rows[i].style.color = "red";
+                    setTimeout(() => {
+                        rows[i].style.color = "black";
+                    }, 3000)
+                }
+
+            }
+        });
+        localStorage.setItem("name", "Hello");
+
+        //clear local storage part
+        document.querySelector("#clear-storage").addEventListener("click", () => {
+
+            localStorage.clear();
+            alert("Local storage cleared successfully")
+        })
+
+
+        //storing to local storage part
+
+        function saveTable() {
+            //select all the rows of the table
+            const rows = document.querySelector(".table").rows;
+
+            let result = "";
+
+            //loop through the rows
+            for (let i = 0; i < rows.length; i++) {
+                const cells = rows[i].cells; //get all the cells at current row
+
+                //loop through the cells of the current row
+                for (let j = 0; j < cells.length; j++) {
+                    result += cells[j].innerText.trim() + ",";
+                }
+
+                result += "~"; //end of row
+            }
+            localStorage.setItem("result", result);
+        }
+
+        //retrieve from local storage
+        function retrieve() {
+            //getting the saved data from local storage
+            const result = localStorage.getItem("result");
+
+            if (!result) {
+                alert("No data found in local storage");
+            }
+
+            //rebuild the table from the saved string
+
+            const rows = result.split("~"); //get all the rows
+
+            let tableHTML = `
+                    <tr style="background-color: darkgreen; color: white; ">
+                        <th width="20%">
+                            Student Number
+                        </th>
+                        <th width="20%">
+                           First Name
+                        </th>
+                        <th width="20%">
+                            Last Name
+                        </th>
+                        <th class="text-center" width="20%">
+                            Email address
+                        </th>
+                        <th class="text-center" width="20%">
+                            Delete
+                        </th>
+
+
+                    </tr>
+                `
+
+            for (let i = 1; i < rows.length - 1; i++) {
+                const cols = rows[i].split(",");
+                tableHTML += `<tr>`
+                for (let j = 0; j < cols.length - 1; j++) {
+                    if (j === 4) {
+                        tableHTML += `<td class="text-center " width="20%">
+                                            <button class="delete btn btn-success">Delete</button>
+                                        </td>`;
+                    }
+                    else {
+                        tableHTML += `<td  width="20%">
+                                            ${cols[j]}
+                                        </td>`;
+                    }
+                }
+                tableHTML += '</tr>';
+            }
+            tableHTML += "</table>";
+            console.log(tableHTML);
+
+            document.querySelector(".table").innerHTML = tableHTML;
+            const buttons = document.querySelectorAll(".delete");
+            buttons.forEach((button) => {
+                button.addEventListener("click", () => {
+                    button.parentNode.parentNode.remove();
+                })
+            })
+            alert("Table loaded from local storage");
+
+        }
+        //delete functionality
+        const buttons = document.querySelectorAll(".delete");
+        buttons.forEach((button) => {
+            button.addEventListener("click", () => {
+                button.parentNode.parentNode.remove();
+            })
+        })
+    </script>
+}
